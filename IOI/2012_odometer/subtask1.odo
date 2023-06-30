@@ -1,0 +1,12 @@
+left # The odometer is now facing west
+
+controlla:
+right
+right
+pebble prendi
+halt
+
+prendi:
+get
+move
+jump controlla

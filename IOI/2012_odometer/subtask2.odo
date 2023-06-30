@@ -1,0 +1,113 @@
+left # The odometer is now facing west
+
+L:
+pebble faiL
+jump resetL
+
+R:
+pebble faiR
+jump resetR
+
+faiL:
+get
+left
+move
+put
+left
+left
+move
+right
+move
+jump R
+
+faiR:
+get
+right
+move
+put
+right
+right
+move
+left
+move
+jump L
+
+resetL:
+left
+move
+pebble L1
+jump L2
+L1:
+get
+left
+left
+move
+put
+left
+jump resetL
+L2:
+left
+left
+move
+right
+move
+resetLR:
+right
+move
+pebble L3
+jump L4
+L3:
+get
+right
+right
+move
+put
+right
+jump resetLR
+L4:
+right
+right
+move
+left
+move
+halt
+
+resetR:
+right
+move
+pebble R1
+jump R2
+R1:
+get
+right
+right
+move
+put
+right
+jump resetR
+R2:
+right
+right
+move
+left
+move
+resetRL:
+left
+move
+pebble R3
+jump R4
+R3:
+get
+left
+left
+move
+put
+left
+jump resetRL
+R4:
+left
+left
+move
+right
+move
+halt

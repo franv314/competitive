@@ -1,0 +1,31 @@
+right # The odometer is now facing east
+
+start:
+    pebble init
+    move
+    jump start
+
+init:
+    left
+    left
+    jump find
+
+find:
+    pebble getCloser
+    move
+    jump find
+
+getCloser:
+    left
+    left
+    move
+    put
+    move
+    pebble end
+    jump find
+
+end:
+    left
+    left
+    move
+    halt
