@@ -1,4 +1,4 @@
-right # The odometer is now facing east
+    right
 
 start:
     pebble init
