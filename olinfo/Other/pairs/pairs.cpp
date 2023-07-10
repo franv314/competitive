@@ -100,7 +100,7 @@ void _3D(int N, int D, int M) {
 int main() {
     int B, N, D, M; in >> B >> N >> D >> M;
     
-    if (B == 1) _1D(N, min(D, B * M), M);
-    if (B == 2) _2D(N, min(D, B * M), M);
-    if (B == 3) _3D(N, min(D, B * M), M);
+    if (B == 1) _1D(N, D, M);
+    if (B == 2) _2D(N, D, M);
+    if (B == 3) _3D(N, D, M);
 }
