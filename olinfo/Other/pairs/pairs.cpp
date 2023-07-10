@@ -22,26 +22,6 @@ struct Fenwick {
     Fenwick(int size) : arr(size) { }  
 };
 
-struct Fenwick2D {
-    vector<vector<int>> arr;
-    
-    void add(int x, int y) {
-        for (int cy = y; cy < arr.size(); cy += cy & -cy)
-            for (int cx = x; cx < arr.size(); cx += cx & -cx)
-                arr[cx][cy]++;
-    }
-    
-    int query(int x, int y) {
-        int ans = 0;
-        for (int cy = y; cy; cy -= cy & -cy)
-            for (int cx = x; cx; cx -= cx & -cx)
-                ans += arr[cx][cy];
-        return ans;
-    }
-    
-    Fenwick2D(int size) : arr(size, vector<int>(size)) { }  
-};
-
 void _1D(int N, int D, int M) {
     vector<int> animals(N);
     for (auto &x: animals) in >> x;
@@ -86,27 +66,35 @@ void _2D(int N, int D, int M) {
 
 void _3D(int N, int D, int M) {
     vector<tuple<int, int, int>> animals(N);
-    vector<Fenwick2D> fenwicks(M + 1, Fenwick2D(2 * M));
+    vector prefix_sums(M + 1, vector(2 * M, vector(2 * M, 0)));
     for (auto &[x, y, z]: animals) {
         int i, j, k; in >> i >> j >> k;
         x = i + j - 1;
         y = j - i + M;
         z = k;
         
-        fenwicks[z].add(x, y);
+        prefix_sums[z][x][y]++;
+    }
+    
+    for (int k = 1; k <= M; k++) {
+        for (int i = 1; i < 2 * M; i++) {
+            for (int j = 1; j < 2 * M; j++) {
+                prefix_sums[k][i][j] += prefix_sums[k][i - 1][j] + prefix_sums[k][i][j - 1] - prefix_sums[k][i - 1][j - 1];
+            }
+        }
     }
     
     long long ans = 0;
     for (auto [x, y, z]: animals) {
         for (int curr_z = max(1, z - D); curr_z <= min(M, z + D); curr_z++) {
             int off = abs(z - curr_z);
-            ans += fenwicks[curr_z].query(min(2 * M - 1, x + D - off), min(2 * M - 1, y + D - off))
-                 - fenwicks[curr_z].query(min(2 * M - 1, x + D - off), max(0, y - D + off - 1))
-                 - fenwicks[curr_z].query(max(0, x - D + off - 1), min(2 * M - 1, y + D - off))
-                 + fenwicks[curr_z].query(max(0, x - D + off - 1), max(0, y - D + off - 1));
+            ans += prefix_sums[curr_z][min(2 * M - 1, x + D - off)][min(2 * M - 1, y + D - off)]
+                 - prefix_sums[curr_z][min(2 * M - 1, x + D - off)][max(0, y - D + off - 1)]
+                 - prefix_sums[curr_z][max(0, x - D + off - 1)][min(2 * M - 1, y + D - off)]
+                 + prefix_sums[curr_z][max(0, x - D + off - 1)][max(0, y - D + off - 1)];
         } 
     }
-    out << (ans - N) / 2 << '\n';
+    out << (ans - N) / 2 << endl;
 }
 
 int main() {
