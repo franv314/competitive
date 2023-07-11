@@ -1,60 +1,73 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define MAXL 10'002
-#define INF (long long)1e18
+#define MAXL 10'001
+typedef long double f80;
 
-long long N, skipped;
-int L, K;
+long long N, L, K;
+f80 dp[MAXL][27][27];
+vector<int> adj[27][27];
+vector<string> words;
 
-vector<int> allowed[27][27];
-optional<long long> dp[MAXL][27][27];
-
-long long recursive(int len, int old1, int old2) {
+f80 rec(int len, string s) {
     if (len == L) {
-        dp[len][old1][old2] = 1;
+        words.push_back(s);
         return 1;
     }
-
-    long long total = 0;
-
-    for (auto next: allowed[old1][old2]) {
-        long long count = dp[len + 1][old2][next].value_or(recursive(len + 1, old2, next));    
-
-        if (total >= INF || count >= INF) total = INF;
-        else total += count;
+    long long cnt = 0;
+    if (len < 2) {
+        for (int x = 0; x < 26; x++)
+            cnt += rec(len + 1, s + (char)('a' + x));
+    } else {
+        for (auto x: adj[s[len - 2] - 'a'][s[len - 1] - 'a'])
+            cnt += rec(len + 1, s + (char)('a' + x));
+        assert(dp[len][s[len - 2] - 'a'][s[len - 1] - 'a'] == cnt);
     }
-    dp[len][old1][old2] = total;
-    return total;
-}
-
-void ans(int len, int old1, int old2) {
-    if (len == L) return;
-
-    for (auto next: allowed[old1][old2]) {
-        if (skipped + dp[len + 1][old2][next].value() >= N) {
-            cout << (char)(next + 'a');
-            return ans(len + 1, old2, next);
-        }
-        skipped += dp[len + 1][old2][next].value();
-    }
+    return cnt;
 }
 
 int main() {
-    cin >> N;
-    cin >> L >> K;
-    
+    cin >> N >> L >> K;
     for (int i = 0; i < K; i++) {
-        char a, b, c; cin >> a >> b >> c;
-        allowed[a - 'a'][b - 'a'].push_back(c - 'a');
+        string S; cin >> S;
+        adj[S[0] - 'a'][S[1] - 'a'].push_back(S[2] - 'a');
     }
-
-    for (int i = 0; i < 27; i++) {
+    for (int i = 0; i < 26; i++) {
         for (int j = 0; j < 26; j++) {
-            allowed[26][i].push_back(j);
+            dp[L][i][j] = 1;
         }
     }
-
-    recursive(0, 26, 26);
-    ans(0, 26, 26);
+    
+    for (int i = 0; i < 27; i++) {
+        for (int j = 0; j < 26; j++) {
+            adj[26][i].push_back(j);
+        }
+    }
+    
+    for (int l = L - 1; l >= 0; l--) {
+        for (int x = 0; x < 27; x++) {
+            for (int y = 0; y < 27; y++) {
+                for (auto z: adj[x][y]) {
+                    dp[l][x][y] += dp[l + 1][y][z];
+                }
+            }
+        }
+    }
+    
+    rec(0, "");
+    
+    int x = 26, y = 26;
+    f80 count = 0;
+    for (int l = 0; l < L; l++) {
+        for (auto z: adj[x][y]) {
+            if (count + dp[l + 1][y][z] < N) {
+                count += dp[l + 1][y][z];
+            } else {
+                cout << (char)(z + 'a');
+                x = y;
+                y = z;
+                break;
+            }
+        }
+    }
 }
