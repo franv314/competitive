@@ -1,236 +1,5 @@
-#pragma GCC optimize("Ofast")
-#include <unistd.h>
-#include <fcntl.h>
 #include <bits/stdc++.h>
-
 using namespace std;
-
-template<size_t BUFSIZE=1<<16>
-class Scanner{
-	private:
-		char buf[BUFSIZE];
-		char* it;
-		char* ed;
-		const int fd;
-		Scanner(const Scanner&) = delete;
-		Scanner& operator=(const Scanner&) = delete;
-		void flush(){
-			if(it==ed){
-				ed=buf+read(fd,buf,BUFSIZE);
-				it=buf;
-			}
-		}
-		void ss(){
-			flush();
-			while(*it<=32){++it;flush();}
-		}
-		void scan(char& x){ss();x=*(it++);}
-		void scan(string& x){
-			do{
-				ss();
-				char * itbg=it;
-				while(it!=ed&&*it>32)++it;
-				x.append(itbg,it);
-			} while(it==ed);
-		}
-		template<typename T> void scan_u(T& x){
-			ss();
-			x=0;
-			do{
-				x=T(x*10+*(it++)-'0');
-				flush();
-			} while(*it>32);
-		}
-		template<typename T> void scan_i(T& x){
-			ss();
-			x=0;
-			bool sign=0;
-			if(*it=='-'){
-				sign=1;
-				++it;
-				flush();
-			}
-			do{
-				x=T(x*10+*(it++)-'0');
-				flush();
-			} while(*it>32);
-			if(sign)x=T(-x);
-		}
-		template<typename T> void scan_f(T& x){
-			ss();
-			x=0;
-			bool sign=0;
-			if(*it=='-'){
-				sign=1;
-				++it;
-				flush();
-			}
-			while(*it>32 && *it!='.'){
-				x=x*T(10.0)+T(*(it++)-'0');
-				flush();
-			}
-			if(*it=='.'){
-				++it;
-				flush();
-				T e=T(0.1);
-				while(*it>32){
-					x=x+e*T(*(it++)-'0');
-					e=e*T(0.1);
-					flush();
-				};
-			}
-			if(sign)x=-x;
-		}
-		void scan(int8_t& x){scan_i(x);}
-		void scan(int16_t& x){scan_i(x);}
-		void scan(int32_t& x){scan_i(x);}
-		void scan(int64_t& x){scan_i(x);}
-		void scan(long long& x){scan_i(x);}
-		void scan(uint8_t& x){scan_u(x);}
-		void scan(uint16_t& x){scan_u(x);}
-		void scan(uint32_t& x){scan_u(x);}
-		void scan(uint64_t& x){scan_u(x);}
-		void scan(unsigned long long& x){scan_u(x);}
-		void scan(float& x){double d; scan_f(d); x=d;}
-		void scan(double& x){scan_f(x);}
-		void scan(long double& x){scan_f(x);}
-
-		template<typename T> void scan(T& x){for(auto &i:x)scan(i);}
-	public:
-		~Scanner(){}
-		Scanner(const int _fd=0):it(0),ed(0),fd(_fd){}
-		void operator()(){}
-		template<typename T, typename...R>
-			void operator()(T& a,R&...rest){
-				scan(a);
-				operator()(rest...);
-			}
-};
-
-template<size_t BUFSIZE=1<<16>
-class Printer {
-	private:
-		char buf[BUFSIZE];
-		char* it;
-		const int fd;
-		void fif(const size_t x){
-			if(size_t(BUFSIZE+buf-it)<x)flush();
-		}
-		void print(const char x){fif(1);*(it++)=x;}
-		void print(char* const x){
-			size_t s = strlen(x);
-			if(s>BUFSIZE/2){
-				flush();
-				write(fd,x,s);
-			} else {
-				fif(s);
-				copy(x,x+s,it);
-				it+=s;
-			}
-		}
-		void print(const char* const x){print((char*)x);}
-		void print(const string& x){
-			if(x.size()>BUFSIZE/2){
-				flush();
-				write(fd,x.data(),x.size());
-			} else {
-				fif(x.size());
-				copy(x.begin(),x.end(),it);
-				it+=x.size();
-			}
-		}
-		template<typename T> void print_u(T x){
-			constexpr size_t siz = size_t(sizeof(T) * log10(256)) + 1;
-			uint8_t i=siz;
-			char b[siz];
-			do {
-				b[--i]=char(x%10+'0');
-				x=T(x/10);
-			}while(x);
-			fif(siz-i);
-			copy(b+i,b+siz,it);
-			it+=siz-i;
-		}
-		template<typename T> void print_i(T x){
-			constexpr size_t siz = size_t(sizeof(T) * 2.4082399653118496) + 2;
-			size_t i=siz;
-			char b[siz];
-			const bool neg=(x<0);
-			if(neg)x=-x;
-			do {
-				b[--i]=char(x%10+'0');
-				x=T(x/10);
-			}while(x);
-			if(neg)b[--i]='-';
-			fif(siz-i);
-			copy(b+i,b+siz,it);
-			it+=siz-i;
-		}
-		void print_f(const double x){
-			const uint64_t d = *((uint64_t*)&x);
-			const bool neg = d>>63;
-			int32_t e = (d>>52)&((1ull<<11)-1);
-			uint64_t m = d&((1ull<<52)-1);
-			if(e){
-				e-=1075;
-				m+=(1ull<<52);
-			} else e=-1074ll;
-			int32_t re=e;
-			if(e<0){
-				while(e++){
-					if(m&0xe000000000000000){
-						m>>=1;
-						re++;
-					} else m*=5;
-				}
-			} else {
-				while(e--){
-					if(m&0x8000000000000000) m/=5;
-					else {
-						m<<=1;
-						re--;
-					}
-				}
-			}
-			if(neg)print('-');
-			print(m);
-			print('e');
-			print(re);
-		}
-		void print(int8_t x){print_i(x);}
-		void print(int16_t x){print_i(x);}
-		void print(int32_t x){print_i(x);}
-		void print(int64_t x){print_i(x);}
-		void print(long long x){print_i(x);}
-		void print(uint8_t x){print_u(x);}
-		void print(uint16_t x){print_u(x);}
-		void print(uint32_t x){print_u(x);}
-		void print(uint64_t x){print_u(x);}
-		void print(unsigned long long x){print_u(x);}
-		void print(const float x){print_f(x);}
-		void print(const double x){print_f(x);}
-		void print(const long double x){print_f(x);}
-
-		template<typename T> void print(const T& x){
-			for(auto &i:x){
-				print(i);
-				print(' ');
-			}
-		}
-	public:
-		~Printer(){flush();}
-		Printer(const int _fd=1):it(buf),fd(_fd){}
-		void flush(){
-			write(fd,buf,it-buf);
-			it=buf;
-		}
-		void operator()(){}
-		template<typename T, typename...R>
-			void operator()(T&& a,R&&...rest){
-				print(a);
-				operator()(rest...);
-			}
-};
 
 #define MAXN 250'001
 
@@ -281,11 +50,15 @@ struct SegTree {
         return get(node->nb, node->ne, lc, rc, lc->sum + rc->sum);
     }
 
-    int query(int l, int r, Node *node) {
-        if (node->nb >= r || node->ne <= l) return 0;
-        if (l <= node->nb && node->ne <= r) return node->sum;
-        return query(l, r, node->lc) + query(l, r, node->rc);
-    }
+    int query_path(int M, Node *u, Node *v, Node *l, Node *pl) {
+		if (u->nb + 1 == u->ne) return u->nb;
+		int count = u->rc->sum + v->rc->sum - l->rc->sum - pl->rc->sum;
+		if (count >= M) {
+			return query_path(M, u->rc, v->rc, l->rc, pl->rc);
+		} else {
+			return query_path(M - count, u->lc, v->lc, l->lc, pl->lc);
+		}
+	}
 
 public:
 
@@ -293,9 +66,9 @@ public:
         roots[node] = add(val, roots[lift[node][0]]);
     }
 
-    int query_path(int node, int ma) {
-        return query(ma + 1, MAXN, roots[node]);
-    }
+    int query_path(int u, int v, int l, int pl, int M) {
+		return query_path(M, roots[u], roots[v], roots[l], roots[pl]);
+	}
 
     SegTree() {
         roots[0] = build(0, MAXN);
@@ -340,17 +113,15 @@ int lca(int u, int v) {
     return lift[u][0];
 }
 
-Scanner<> scan;
-Printer<> prnt;
-
 int main() {
-    int N; scan(N);
+	ios::sync_with_stdio(false); cin.tie(NULL);
+    int N; cin >> N;
     for (int i = 1; i <= N; i++) {
-        scan(V[i]);
+        cin >> V[i];
     }
 
     for (int i = 2; i <= N; i++) {
-        int P; scan(P);
+        int P; cin >> P;
         children[P].push_back(i);
     }
 
@@ -359,25 +130,12 @@ int main() {
     lift_size[1] = 1;
     dfs(1);
 
-    int Q; scan(Q);
+    int Q; cin >> Q;
     while (Q--) {
-        int u, v, k; scan(u, v, k);
+        int u, v, k; cin >> u >> v >> k;
         int l = lca(u, v);
+		int pl = lift[l][0];
 
-        int L = 0, R = N + 1;
-        while (L + 1 < R) {
-            int M = (L + R) / 2;
-
-            int count
-                = segtree.query_path(u, M)
-                + segtree.query_path(v, M)
-                - 2 * segtree.query_path(l, M);
-
-            if (V[l] > M) count++;
-
-            if (count >= k) L = M;
-            else R = M;
-        }
-        prnt(R, '\n');
+        cout << segtree.query_path(u, v, l, pl, k) << '\n';
     }
 }
