@@ -362,7 +362,7 @@ int main() {
     int Q; scan(Q);
     while (Q--) {
         int u, v, k; scan(u, v, k);
-        int l = 1;
+        int l = lca(u, v);
 
         int L = 0, R = N + 1;
         while (L + 1 < R) {
