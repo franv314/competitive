@@ -1,8 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
-
 void solve() {
     int A, B, C;
     cin >> A >> B >> C;
