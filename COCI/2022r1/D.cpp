@@ -1,5 +1,3 @@
-// Task "Iksevi"
-
 #include <bits/stdc++.h>
 using namespace std;
 

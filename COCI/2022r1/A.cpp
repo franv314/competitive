@@ -1,5 +1,3 @@
-// Task "Desni klik"
-
 #include <bits/stdc++.h>
 using namespace std;
 
