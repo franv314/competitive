@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <immintrin.h>
-#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+#pragma GCC target("avx512bw,popcnt")
 using namespace std;
 
 void solve() {
@@ -30,44 +31,23 @@ void solve() {
         }
     }
 
-    __m256i total = _mm256_set1_epi16(0);
-    for (uint16_t i = 0; i < (1 << 15); i += 0x10) {
-        __m256i input = _mm256_set_epi16(
-            i + 0x0, i + 0x1, i + 0x2, i + 0x3,
-            i + 0x4, i + 0x5, i + 0x6, i + 0x7,
-            i + 0x8, i + 0x9, i + 0xA, i + 0xB,
-            i + 0xC, i + 0xD, i + 0xE, i + 0xF
-        );
-
-        __m256i accumulator = _mm256_set1_epi16(0);
+    int res = 0;
+    alignas(32) uint16_t inputs[32];
+    iota(inputs, inputs + 32, 0);
+    __m512i input = _mm512_load_si512(inputs);
+    for (uint16_t i = 0; i < (1 << 15); i += 0x20) {
+        __mmask32 accumulator = 0;
         for (auto [or_mask_16, xor_mask_16]: expr) {
-            __m256i or_mask = _mm256_set1_epi16(or_mask_16);
-            __m256i xor_mask = _mm256_set1_epi16(xor_mask_16);
-            __m256i result = or_mask | (input ^ xor_mask);
-            result = _mm256_cmpeq_epi16(result, _mm256_set1_epi16(0x7FFF));
-            accumulator ^= result;
+            __m512i or_mask = _mm512_set1_epi16(or_mask_16);
+            __m512i xor_mask = _mm512_set1_epi16(xor_mask_16);
+            __m512i result = or_mask | (input ^ xor_mask);
+            accumulator ^= (_mm512_cmpeq_epi16_mask(result, _mm512_set1_epi16(0x7FFF)));
         }
-        total += accumulator & _mm256_set1_epi16(1);
+        res += __builtin_popcount(accumulator);
+
+        input += _mm512_set1_epi16(0x20);
     }
 
-    int res = 0;
-    res += _mm256_extract_epi16(total, 0x0);
-    res += _mm256_extract_epi16(total, 0x1);
-    res += _mm256_extract_epi16(total, 0x2);
-    res += _mm256_extract_epi16(total, 0x3);
-    res += _mm256_extract_epi16(total, 0x4);
-    res += _mm256_extract_epi16(total, 0x5);
-    res += _mm256_extract_epi16(total, 0x6);
-    res += _mm256_extract_epi16(total, 0x7);
-    res += _mm256_extract_epi16(total, 0x8);
-    res += _mm256_extract_epi16(total, 0x9);
-    res += _mm256_extract_epi16(total, 0xA);
-    res += _mm256_extract_epi16(total, 0xB);
-    res += _mm256_extract_epi16(total, 0xC);
-    res += _mm256_extract_epi16(total, 0xD);
-    res += _mm256_extract_epi16(total, 0xE);
-    res += _mm256_extract_epi16(total, 0xF);
-    
     cout << (res >> (15 - K)) << "\n";
 }
 
