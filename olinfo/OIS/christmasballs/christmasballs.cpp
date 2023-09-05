@@ -11,11 +11,11 @@ vector<int> adj[MAXN];
 
 int ma = INT_MIN;
 
-struct EnrichedMap {
+struct Info {
     unordered_map<int, int> freq;
     int mode_am, mode_no;
 
-    void merge(EnrichedMap other) {
+    void merge(Info other) {
         for (auto [val, am]: other.freq) {
             freq[val] += am;
             if (freq[val] == mode_am) mode_no++;
@@ -26,17 +26,17 @@ struct EnrichedMap {
         }
     }
 
-    EnrichedMap(int val) {
+    Info(int val) {
         freq[val] = 1;
         mode_no = 1;
         mode_am = 1;
     }
 };
 
-EnrichedMap dfs(int node) {
-    EnrichedMap map_1(C[node]);
+Info dfs(int node) {
+    Info map_1(C[node]);
     for (auto child: adj[node]) {
-        EnrichedMap map_2 = dfs(child);
+        Info map_2 = dfs(child);
         if (map_1.freq.size() < map_2.freq.size()) swap(map_1, map_2);
         map_1.merge(map_2);
     }
