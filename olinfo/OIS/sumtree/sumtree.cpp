@@ -74,18 +74,13 @@ int main() {
         int tot_size = preprocess(node, -1);
 
         int centroid = node, old = -1;
-        for (;;) {
-            bool exit = true;
-            for (auto [n, _]: adj[centroid]) {
-                if (n != old && size[n] * 2 >= tot_size) {
-                    old = centroid;
-                    centroid = n;
-                    exit = false;
-                    break;
-                }
+        again:
+        for (auto [n, _]: adj[centroid]) {
+            if (n != old && size[n] * 2 >= tot_size) {
+                old = centroid;
+                centroid = n;
+                goto again;
             }
-
-            if (exit) break;
         }
 
         gp_hash_table<int, pair<int64_t, int>> depths;
