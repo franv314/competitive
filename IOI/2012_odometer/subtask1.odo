@@ -1,12 +1,12 @@
-left # The odometer is now facing west
+    left
 
 controlla:
-right
-right
-pebble prendi
-halt
+    right
+    right
+    pebble prendi
+    halt
 
 prendi:
-get
-move
-jump controlla
+    get
+    move
+    jump controlla
