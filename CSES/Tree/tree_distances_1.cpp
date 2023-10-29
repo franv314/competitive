@@ -14,39 +14,39 @@ int main() {
         adj[v].push_back(u);
     }
 
-    vector<long long> sizes(n);
-    vector<long long> ans(n);
-    long long curr = 0;
+    vector<multiset<int>> vals(n);
+    vector<int> ans(n);
 
-    function<int(int, int, int)> dfs_1 = [&](int node, int par, int d) {
-        curr += d;
-        sizes[node] = 1;
-
+    function<int(int, int)> dfs_1 = [&](int node, int par) {
+        vals[node].insert(0);
         for (auto c: adj[node]) {
             if (c == par) continue;
-            sizes[node] += dfs_1(c, node, d + 1);
+            vals[node].insert(dfs_1(c, node));
         }
-
-        return sizes[node];
+        return 1 + *vals[node].rbegin();
     };
 
     function<void(int, int)> dfs_2 = [&](int node, int par) {
+        int added, removed;
         if (par != -1) {
-            curr += n - sizes[node] - sizes[node];
+            vals[par].erase(vals[par].find(removed = 1 + *vals[node].rbegin()));
+            vals[node].insert(added = 1 + *vals[par].rbegin());
         }
 
-        ans[node] = curr;
+        ans[node] = *vals[node].rbegin();
+
         for (auto c: adj[node]) {
             if (c == par) continue;
             dfs_2(c, node);
         }
 
         if (par != -1) {
-            curr -= n - sizes[node] - sizes[node];
+            vals[par].insert(removed);
+            vals[node].erase(vals[node].find(added));
         }
     };
 
-    dfs_1(0, -1, 0);
+    dfs_1(0, -1);
     dfs_2(0, -1);
 
     for (auto x: ans) cout << x << ' ';
