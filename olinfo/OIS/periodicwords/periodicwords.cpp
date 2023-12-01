@@ -18,9 +18,11 @@ int main() {
     }
 
     vector<vector<int>> divisors(N + 1);
-    for (int i = 1; i <= N; i++) {
-        for (int j = 2 * i; j <= N; j += i) {
-            divisors[j].push_back(i);
+
+    for (int i = 2; i <= N; i++) {
+        if (!divisors[i].empty()) continue;
+        for (int j = i; j <= N; j += i) {
+            divisors[j].push_back(j / i);
         }
     }
 
@@ -35,6 +37,7 @@ int main() {
 
         bool ok = false;
         for (auto i: divisors[r - l]) {
+            if (i == r - l) continue;
             hash_t h1 = range_hash(l, r - i);
             hash_t h2 = range_hash(l + i, r);
 
