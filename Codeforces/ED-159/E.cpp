@@ -12,13 +12,18 @@ void solve() {
     vector<string> s(n);
     for (auto &x: s) cin >> x;
 
+    mt19937 rng(77);
+    vector<int> alphabet(26);
+    iota(alphabet.begin(), alphabet.end(), 0);
+    shuffle(alphabet.begin(), alphabet.end(), rng);
+
     vector<unordered_map<long long, pair<long long, long long>>> hashes(MAXS);
     for (auto &x: s) {
         int h1 = 0;
         int h2 = 0;
         for (int i = 0; i < x.size(); i++) {
-            h1 = (h1 * B1 + x[i] - 'a') % MOD;
-            h2 = (h2 * B2 + x[i] - 'a') % MOD;
+            h1 = (h1 * B1 + alphabet[x[i] - 'a']) % MOD;
+            h2 = (h2 * B2 + alphabet[x[i] - 'a']) % MOD;
             long long h = (long long)h1 << 32 | h2;
 
             auto &mref = hashes[i + 1][h];
@@ -40,8 +45,8 @@ void solve() {
         int h2 = 0;
 
         for (int i = 0; i < x.size(); i++) {
-            h1 = (h1 * B1 + x[i] - 'a') % MOD;
-            h2 = (h2 * B2 + x[i] - 'a') % MOD;
+            h1 = (h1 * B1 + alphabet[x[i] - 'a']) % MOD;
+            h2 = (h2 * B2 + alphabet[x[i] - 'a']) % MOD;
             
             long long h = (long long)h1 << 32 | h2;
 
