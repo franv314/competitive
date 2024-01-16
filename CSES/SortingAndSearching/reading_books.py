@@ -1,0 +1,1 @@
+(lambda _, a: print(max(sum(a), 2 * max(a))))(input(), list(map(int, input().split())))
