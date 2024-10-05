@@ -2,51 +2,41 @@
 using namespace std;
 
 int main() {
-    ios_base::sync_with_stdio(false); cin.tie(NULL);
+    ios::sync_with_stdio(false); cin.tie(NULL);
+    int n, q; cin >> n >> q;
     
-    int n, m; cin >> n >> m;
-    vector<array<int, 3>> hills(n);
-    vector<pair<int, int>> starts(m);
-
-    for (auto &[x, t, s]: hills) cin >> x >> t >> s;
-    for (int i = 0; i < m; i++) {
-        cin >> starts[i].first;
-        starts[i].second = i;
-    }
-
-    sort(hills.begin(), hills.end());
-    sort(starts.begin(), starts.end());
-
-    set<pair<long long, int>> l, r;
+    vector<int> a(n), pos_of(n);
     for (int i = 0; i < n; i++) {
-        auto [x, t, s] = hills[i];
-        r.emplace(x - t, i);
+        cin >> a[i];
+        pos_of[--a[i]] = i;
+
     }
 
-    int rem = 0;
+    set<int> ones;    
+    for (int i = 0; i < n; i++)
+        if ((a[i] - a[(i - 1 + n) % n] + n) % n == 1)
+            ones.insert(i);
 
-    vector<long long> ans(m);
-    for (auto [a, idx]: starts) {
-        while (rem < hills.size() && hills[rem][0] < a) {
-            auto [x, t, s] = hills[rem];
-            r.erase({x - t, rem});
-            l.emplace(x + t, rem);
+    while (q--) {
+        int _x, _y; cin >> _x >> _y;
+        _x--, _y--;
+        int x = pos_of[_x], y = pos_of[_y];
+        swap(pos_of[_x], pos_of[_y]);
+        swap(a[x], a[y]);
 
-            rem++;
-        }
+        if ((a[x] - a[(x - 1 + n) % n] + n) % n == 1) ones.insert(x);
+        else ones.erase(x);
 
-        long long ma = 0;
-        if (!r.empty()) {
-            auto [_, i] = *r.begin();
-            ma = max(ma, (long long)hills[i][1] - (hills[i][0] - a));
-        }
-        if (!l.empty()) {
-            auto [_, i] = *l.rbegin();
-            ma = max(ma, (long long)hills[i][1] - (a - hills[i][0]));
-        }
+        if ((a[y] - a[(y - 1 + n) % n] + n) % n == 1) ones.insert(y);
+        else ones.erase(y);
 
-        ans[idx] = ma;
+        if ((a[(x + 1) % n] - a[x] + n) % n == 1) ones.insert((x + 1) % n);
+        else ones.erase((x + 1) % n);
+
+        if ((a[(y + 1) % n] - a[y] + n) % n == 1) ones.insert((y + 1) % n);
+        else ones.erase((y + 1) % n);
+
+        if (ones.size() == n) cout << "DA\n";
+        else cout << "NE\n";
     }
-
-    for (auto x: ans) cout << x << ' '; cout << '\n';
 }
